@@ -7,6 +7,7 @@
     "example01": "parcel example01/index.html",
     "example02": "parcel example02/index.html",
     "example03": "parcel example03/index.html",
+    "example04": "parcel example04/index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Chris Henrick <chrishenrick@gmail.com> (http://clhenrick.io)",
@@ -22,6 +23,8 @@
     "single-line-string": "^0.0.2"
   },
   "devDependencies": {
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "parcel-bundler": "^1.8.1"
   }
 }
