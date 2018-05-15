@@ -3,15 +3,20 @@
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
     <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd-connector/master/dist/browser-connector.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd-crossfilter/master/dist/mapd-crossfilter.js"></script>
+    <script src="https://gitcdn.xyz/repo/mapd/mapd-charting/master/dist/mapdc.js"></script>
     <link rel="stylesheet" href="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.css">
   </head>
   <body>
     <div class="chart"></div>
     <script>
-      console.log(MapdCon, mapd3, crossfilter)
+      console.log("mapd-connector", MapdCon)
+      console.log("mapd3", mapd3)
+      console.log("mapd-crossfilter", crossfilter)
+      console.log("mapd-charting", mapdc)
 
       const connector = new MapdCon()
 
