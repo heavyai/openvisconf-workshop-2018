@@ -4,52 +4,117 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
     <title></title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd-connector/master/dist/browser-connector.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.js"></script>
     <script src="https://gitcdn.xyz/repo/mapd/mapd-crossfilter/master/dist/mapd-crossfilter.js"></script>
-    <script src="https://gitcdn.xyz/repo/mapd/mapd-charting/master/dist/mapdc.js"></script>
+    <!-- <script src="https://gitcdn.xyz/repo/mapd/mapd-charting/master/dist/mapdc.js"></script> -->
+    <script src="mapdc.js"></script>
     <link rel="stylesheet" href="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.css">
   </head>
   <body>
-    <div class="chart"></div>
+    <div class="stacked-bar-example"></div>
     <script>
       console.log("mapd-connector", MapdCon)
       console.log("mapd3", mapd3)
       console.log("mapd-crossfilter", crossfilter)
-      console.log("mapd-charting", mapdc)
+      console.log("mapd-charting", dc)
 
-      const connector = new MapdCon()
-
-      function establishConnection() {
-        return new Promise((resolve, reject) => {
-          connector
-            .protocol("https")
-            .host("34.245.134.33")
-            .port("8443")
+      const connector = new MapdCon().protocol("https")
+            .host("metis.mapd.com")
+            .port("443")
             .dbName("mapd")
             .user("mapd")
-            .password("i-00d46e7fcc46881a1")
-            .connect((error, con) => {
-              if (error) {
-                reject(error)
-              } else if (con) {
-                resolve(con)
-              }
-            })
-        })
-      }
-      // connect to the mapd backend
-      establishConnection()
-        .then(con => {
-          // log the connection object
-          console.log(con)
+            .password("HyperInteractive")
+            .connect(function(error, con) {
+        // Get a table from the database
+        var tableName = 'tweets_nov_feb';
+        // A CrossFilter instance is used for generating the raw query strings for your MapdCon.
+        var crossFilter = crossfilter.crossfilter(con, tableName)
+          .then(function(cf) {
+            createCharts(cf, con, tableName)
+          })
+      })
 
-          // check the connection status
-          con.getStatusAsync().then(result => console.log(result))
-        })
-        .catch(error => {
-          throw error
-        })
+      var globalGeocoder = null;
+
+  function createCharts(crossFilter, con, tableName) {
+    var w = document.documentElement.clientWidth - 30;
+    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 150;
+
+    var timeChartMeasures = [
+         {
+           expression: "join_time",
+           agg_mode:"min",
+           name: "minimum"
+         },
+         {
+           expression: "join_time",
+           agg_mode:"max",
+           name: "maximum"}
+         ]
+
+
+         crossFilter
+           .groupAll()
+           .reduce(timeChartMeasures)
+           .valuesAsync(true).then(function(timeChartBounds) {
+
+            var joinDimension = crossFilter.dimension(["join_time", "country"])
+
+            var joinGroup = joinDimension
+                            .group()
+                            .reduceCount()
+
+
+             var dcTimeChart = dc.dc.barChart('.stacked-bar-example')
+               .width(w)
+               .height(h)
+               .elasticY(true)
+               .renderHorizontalGridLines(true)
+               .xAxisLabel('Join Time')
+               .yAxisLabel('Number of New Users')
+               .dimension(joinDimension)
+               .group(joinGroup)
+               .binParams({
+                  timeBin: 'month',
+                  binBounds: [timeChartBounds.minimum, timeChartBounds.maximum]
+                 });
+
+              /* Pass in a series to enable stacking function */
+              dcTimeChart.series().group(crossFilter.dimension('country').group())
+
+              dcTimeChart.series().selected(['US','BR','ID','AR','TR'])
+
+             /* Set the x and y axis formatting with standard d3 functions */
+             dcTimeChart
+               .x(d3.time.scale.utc().domain([timeChartBounds.minimum, timeChartBounds.maximum]))
+               .yAxis().ticks(5);
+
+             dcTimeChart
+               .xAxis()
+               .scale(dcTimeChart.x())
+               .tickFormat(dc.dc.utils.customTimeFormat)
+               .orient('top');
+
+             dc.dc.coreAsync.renderAllAsync()
+
+             /*--------------------------RESIZE EVENT------------------------------*/
+             window.addEventListener("resize", _.debounce(reSizeAll, 500));
+
+             function reSizeAll(){
+
+               var w = document.documentElement.clientWidth - 30;
+               var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 150;
+
+               dcTimeChart
+                 .width(w)
+                 .height(h)
+
+               dc.dc.coreAsync.redrawAllAsync();
+             }
+            });
+  }
     </script>
   </body>
 </html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+    <script src="https://gitcdn.xyz/repo/mapd/mapd-connector/master/dist/browser-connector.js"></script>
+    <script src="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.js"></script>
+    <script src="https://gitcdn.xyz/repo/mapd/mapd-crossfilter/master/dist/mapd-crossfilter.js"></script>
+    <!-- <script src="https://gitcdn.xyz/repo/mapd/mapd-charting/master/dist/mapdc.js"></script> -->
+    <script src="mapdc.js"></script>
+    <link rel="stylesheet" href="https://gitcdn.xyz/repo/mapd/mapd3/master/dist/mapd3.css">
+  </head>
+  <body>
+    <div class="chart"></div>
+    <script>
+      console.log("mapd-connector", MapdCon)
+      console.log("mapd3", mapd3)
+      console.log("mapd-crossfilter", crossfilter)
+      console.log("mapd-charting", dc)
+
+      const connector = new MapdCon()
+
+      function establishConnection() {
+        return new Promise((resolve, reject) => {
+          connector
+            .protocol("https")
+            .host("34.245.134.33")
+            .port("8443")
+            .dbName("mapd")
+            .user("mapd")
+            .password("i-00d46e7fcc46881a1")
+            .connect((error, con) => {
+              if (error) {
+                reject(error)
+              } else if (con) {
+                resolve(con)
+              }
+            })
+        })
+      }
+      // connect to the mapd backend
+      establishConnection()
+        .then(con => {
+          // log the connection object
+          console.log(con)
+
+          // check the connection status
+          con.getStatusAsync().then(result => console.log(result))
+        })
+        .catch(error => {
+          throw error
+        })
+    </script>
+  </body>
+</html>
