@@ -5726,6 +5726,10 @@ simplify-js@^1.2.1:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/simplify-js/-/simplify-js-1.2.3.tgz#a3422c1b9884d60421345eb44d2b872662df27f5"
 
+single-line-string@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/single-line-string/-/single-line-string-0.0.2.tgz#db0a5ef77499216c1415dc9ff1c321e2a6b455ab"
+
 slash@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/slash/-/slash-1.0.0.tgz#c41f2f6c39fc16d1cd17ad4b5d896114ae470d55"
