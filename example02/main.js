@@ -2,9 +2,19 @@ import "babel-polyfill"
 import MapDCon from '@mapd/connector/dist/browser-connector'
 import * as mapd3 from "mapd3/dist/mapd3.js"
 import "mapd3/dist/mapd3.css"
+import sls from "single-line-string"
 
 const connector = new window.MapdCon()
 const table = "flights_2008_7M"
+const query = sls`
+  SELECT date_trunc(month, arr_timestamp) as key0,
+  AVG(arrdelay) AS val
+  FROM ${table}
+  WHERE (arr_timestamp >= TIMESTAMP(0) '2008-01-01 00:00:00'
+  AND arr_timestamp <= TIMESTAMP(0) '2009-01-01 11:24:00')
+  AND arrdelay IS NOT NULL
+  GROUP BY key0
+  ORDER BY key0`
 
 function establishConnection() {
   return new Promise((resolve, reject) => {
@@ -37,54 +47,27 @@ establishConnection()
     // look at the fields in the flights_2008_7M table
     con.getFieldsAsync(table).then(fields => console.log(fields))
 
-    return con.queryAsync(`SELECT carrier_name AS key0, count(*) AS val FROM ${table} GROUP BY key0 ORDER BY val desc LIMIT 5`)
-  })
-  .then(topN => {
-    console.log(topN)
-
-    // use the topN result from the previous query to create the actual query for our data
-    return connector.queryAsync(`SELECT
-      dest_city AS key0,
-      CASE
-        WHEN carrier_name IN
-          (${topN.map(d => `'${d.key0}'`)})
-        THEN carrier_name
-        ELSE 'other'
-      END AS key1,
-      count(*) AS val
-      FROM ${table}
-      WHERE (
-        dest_city IN (
-          SELECT dest_city
-          FROM ${table}
-          GROUP BY dest_city
-          ORDER BY count(*) DESC
-          LIMIT 100
-        )
-      OR dest_city IS NULL)
-      GROUP BY key0 ,key1
-      ORDER BY val ASC`
-    )
+    return con.queryAsync(query)
   })
   .then(data => {
     console.log(data)
 
-    // nest our data by key1 property ('carrier_name')
-    let series = mapd3.d3.nest()
-      .key(d => d.key1)
-      .entries(data)
+    let series = []
+    series.push({
+      group: 0, // will be non-zero for 2nd axis
+      id: 0,
+      label: "avg arrdelay",
+      dimensionName: "arr_timestamp",
+      measureName: "avg arrdelay",
+      values: data.map(function (d) {
+        return {
+          key: Array.isArray(d.key0) ? d.key0[0] : d.key0,
+          value: d.val
+        }
+      }).reverse()
+    })
 
-    series = series.map((d, i) => ({
-      group: 0,
-      id: i,
-      label: d.key,
-      values: d.values.map(d => ({
-        key: d.key0,
-        value: d.val
-      }))
-    }))
-
-    return { series }
+    return { series: series }
   })
   .then(series => {
     const container = document.querySelector("body")
@@ -104,9 +87,9 @@ establishConnection()
           bottom: 64,
           left: 80
         },
-        keyType: "string", // time, number, string
-        chartType: "stackedBar", // line, area, stackedArea, bar, stackedBar
-        useScrolling: true,
+        keyType: "time", // time, number, string
+        chartType: "line", // line, area, stackedArea, bar, stackedBar
+        useScrolling: false,
 
         // intro animation
         isAnimated: false,
@@ -120,7 +103,7 @@ establishConnection()
         y2Domain: "auto",
 
         // data
-        sortBy: "totalDescending", // totalAscending, totalDescending, alphaAscending, alphaDescending
+        sortBy: null, // totalAscending, totalDescending, alphaAscending, alphaDescending
 
         // axis
         tickPadding: 5,
@@ -146,7 +129,7 @@ establishConnection()
         // format
         dateFormat: "%b %d, %Y",
         tooltipTitleDateFormat: "%b %d, %Y",
-        inputDateFormat: "%m-%d-%Y",
+        // inputDateFormat:  "%m-%d-%Y",
         numberFormat: ".2f",
 
         // legend
