@@ -15,6 +15,7 @@
     "@mapd/mapd-charting": "https://github.com/mapd/mapd-charting.git",
     "@mapd/mapd-crossfilter": "https://github.com/mapd/mapd-crossfilter.git",
     "babel-polyfill": "^6.26.0",
+    "d3": "^5.4.0",
     "mapbox-gl": "https://github.com/mapd/mapbox-gl-js/tarball/9c04de6949fe498c8c79f5c0627dfd6d6321f307",
     "mapd3": "^0.15.2"
   },
