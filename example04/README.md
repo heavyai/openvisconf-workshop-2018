@@ -1,18 +1,8 @@
-# Example 01: Connecting to a MapD-Core
+# Example 04: Using MapD Crossfilter and MapD Charting
 
-In this is example we'll connect to our MapD Core database and renderer.
+In this example we will use `mapd-charting` and `mapd-crossfilter` with our database
+to create a few charts that can crossfilter one another.
 
-You'll need to add a `.env` file to the root of this repository with the following:
+**NOTE: this example is not yet working with Parcel.JS, we are working on fixing it**
 
-```
-DATABASE=mapd
-USERNAME=mapd
-PASSWORD=<password>
-HOST=<host>
-PORT=<port>
-PROTOCOL=https
-```
-
-Note that the parts with `<value>` will need to be replaced with actual values.
-We will provide these values for you during the workshop, and they may be changed
-later to connect to a different MapD instance on AWS.
+_You may however use the examples in the [mapd-charting Github repository](https://github.com/mapd/mapd-charting/tree/master/example)_
